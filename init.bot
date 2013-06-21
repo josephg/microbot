@@ -6,7 +6,7 @@ Robot::load = (name) ->
 @load 'node-print'
 
 network = @load 'network'
-network.load 'servo'
+network.load 'server'
 
 @load 'repl'
 

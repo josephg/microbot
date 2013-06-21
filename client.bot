@@ -7,7 +7,7 @@ Robot::load = (name) ->
 @load 'repl'
 
 network = @load 'network'
-network.load 'federatron'
+network.load 'netclient'
 
 network.transmit 'federate', 'ws://localhost:4321/ws'
 

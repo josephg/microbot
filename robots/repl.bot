@@ -1,0 +1,28 @@
+@robot "repl",
+  local: true
+  version: '0.0.0'
+  description: 'A repl for interacting with the stream'
+
+readline = require 'readline'
+
+rl = readline.createInterface
+  input:process.stdin
+  output:process.stdout
+
+rl.setPrompt '> '
+rl.prompt()
+
+rl.on 'line', (cmd) =>
+  if cmd.match /\w/ # cmd has non-whitespace chars
+    if cmd[0] is '/'
+      @transmit "usercmd", cmd[1..]
+    else
+      @transmit type:"chat", local:false, data:cmd
+
+    setTimeout ->
+      rl.prompt()
+    , 10
+
+  else
+    rl.prompt()
+

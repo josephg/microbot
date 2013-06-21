@@ -1,0 +1,9 @@
+#!/usr/bin/env coffee
+fs = require 'fs'
+
+unless process.argv[2]
+  return console.error("Usage: ./runrobot robotname")
+
+Robot = require './Robot'
+robot = new Robot fs.readFileSync(process.argv[2], 'utf8')
+

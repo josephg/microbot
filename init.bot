@@ -1,0 +1,10 @@
+@robot 'init', local:true
+
+fs = require 'fs'
+
+load = (name) =>
+  @children.add fs.readFileSync("robots/#{name}.bot", 'utf8')
+
+load 'node-print'
+load 'repl'
+

@@ -1,0 +1,15 @@
+@robot 'printbot',
+  local: true
+  version: '0.0.0'
+  description: "Console logs whatever it sees."
+
+require 'colors'
+
+printJSON = (data) -> require('util').inspect data, colors:true
+
+@listen (msg) ->
+  if msg.type is 'chat'
+    console.log "#{msg.from.blue}: #{msg.data}"
+  else
+    console.log msg.type.red, printJSON msg
+

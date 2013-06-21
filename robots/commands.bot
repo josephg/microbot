@@ -1,0 +1,43 @@
+@robot 'commands',
+  local: true
+  description: 'Common repl slash-commands'
+
+cmds = {}
+register = (cmd, desc = '', fn) -> cmds[cmd.toUpperCase()] = {fn, desc}
+
+register 'help', 'Get help on commands', (args, reply) ->
+  if args.length is 0
+    # Reply listing the commands
+    replyData = []
+    for name, c of cmds
+      replyData.push [name, c.desc]
+
+    reply type:'system message', replyData
+  else
+    c = cmds[args[0].toUpperCase()]
+    return reply 'error', {msg:"unknown command #{args[0]}"} if !c
+
+    reply type:'system message', c.desc
+
+
+register 'send', 'Send a JSON message. Eg, /send chat {data:"oh hi"}', (args, reply) =>
+  try
+    type = args[0]
+    msg = if args.length > 1 then JSON.parse args[1..].join ' ' else {}
+    @transmit type, msg
+  catch e
+    reply {type:'error', data:e.stack}
+
+@listen 'register command', ({data:{cmd, fn, desc}, local}) ->
+  return unless local
+  register cmd, fn, desc
+
+
+@listen 'usercmd', ({data:{cmd, args}, local}, reply) ->
+  return unless local
+
+  c = cmds[cmd.toUpperCase()]
+  return reply 'error', {msg:"unknown command #{cmd}"} if !c
+
+  c.fn args, reply
+

@@ -14,6 +14,9 @@ printJSON = (data) -> require('util').inspect data, colors:true
     when 'robot added'
       console.log 'Robot added'.grey, "#{msg.data.name} (#{msg.data.info?.description})"
 
+    when 'error'
+      console.error (msg.data?.stack or msg.data?.message or 'Unknown error').red
+
     else
-      console.log msg.type.red, printJSON msg.data
+      console.log (msg.type or '(no type)').red, printJSON msg.data
 

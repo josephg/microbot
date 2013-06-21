@@ -15,9 +15,9 @@ rl.prompt()
 rl.on 'line', (cmd) =>
   if cmd.match /\w/ # cmd has non-whitespace chars
     if cmd[0] is '/'
-      console.log cmd[1..]
-      args = cmd[1..].split " " # This doesn't strip trailing spaces, but whatever.
-      @transmit "usercmd", cmd:args[0], args:args[1..]
+      #console.log cmd[1..]
+      #args = cmd[1..].split " " # This doesn't strip trailing spaces, but whatever.
+      @transmit "usercmd", cmd[1..]
     else
       @transmit type:"chat", local:false, data:cmd
 

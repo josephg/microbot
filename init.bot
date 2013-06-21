@@ -1,11 +1,12 @@
 @robot 'init', local:true
 
-fs = require 'fs'
+Robot::load = (name) ->
+  @children.add require('fs').readFileSync("robots/#{name}.bot", 'utf8')
 
-load = (name) =>
-  @children.add fs.readFileSync("robots/#{name}.bot", 'utf8')
+@load 'node-print'
 
-load 'node-print'
-load 'servo'
-load 'repl'
+network = @load 'network'
+network.load 'servo'
+
+@load 'repl'
 

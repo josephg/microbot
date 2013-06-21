@@ -1,14 +1,13 @@
-@robot 'init', local:true
+@robot 'client', local:true
 
-fs = require 'fs'
+Robot::load = (name) ->
+  @children.add require('fs').readFileSync("robots/#{name}.bot", 'utf8')
 
-load = (name) =>
-  @children.add fs.readFileSync("robots/#{name}.bot", 'utf8')
+@load 'node-print'
+@load 'repl'
 
-load 'node-print'
-load 'repl'
+network = @load 'network'
+network.load 'federatron'
 
-load 'federatron'
-
-@transmit 'federate', 'ws://localhost:4321/ws'
+network.transmit 'federate', 'ws://localhost:4321/ws'
 

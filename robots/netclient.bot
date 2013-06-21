@@ -16,8 +16,9 @@ WebSocket = require('ws')
   connect = =>
     party = new WebSocket host
 
-    party.onopen = ->
-      console.log 'connected'
+    party.onopen = =>
+      @transmit 'connected', host
+      #console.log 'connected'
 
     party.onmessage = (e) =>
       return if party.readyState isnt 1
@@ -36,7 +37,7 @@ WebSocket = require('ws')
     party.send msg unless msg.local
 
   @listen 'send message', ({data: msg}) ->
-    console.log "got send message", msg
+    #console.log "got send message", msg
     return if party.readyState isnt 1
     unless msg.local
       party.send JSON.stringify msg

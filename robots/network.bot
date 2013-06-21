@@ -20,3 +20,8 @@ randomId = (length = 10) ->
 @children.listen "incoming message", ({data:msg}) ->
   @parent.distribute msg, this
 
+
+# These are actually started by sending the appropriate messages
+@load 'server'
+@load 'netclient'
+

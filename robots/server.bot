@@ -2,42 +2,46 @@
   local: true
   description: "Serves web interface and listens for browserchannel connections."
 
-express = require 'express'
-ws = require 'ws'
+@listen 'run server', ({data:{port}, local}) =>
+  return unless local
 
-app = express()
-app.use express.static(__dirname + '/public')
+  port ?= 4321
 
-server = require('http').createServer(app)
-wss = new ws.Server clientTracking:true, path:'/ws', server:server
+  express = require 'express'
+  ws = require 'ws'
 
-wss.on 'connection', (client) =>
-  @transmit 'client connected', {client}
-  #console.log "Client connected", wss
+  app = express()
+  app.use express.static(__dirname + '/public')
 
-  client.on 'message', (msg) =>
-    data = JSON.parse msg
-    return if data is null or data.local
-    @transmit 'incoming message', data
-    #console.log "message", msg
+  server = require('http').createServer(app)
+  wss = new ws.Server clientTracking:true, path:'/ws', server:server
 
-    # broadcast to all other clients
-    c.send msg for c in wss.clients when c != client
+  wss.on 'connection', (client) =>
+    @transmit 'client connected', {client}
+    #console.log "Client connected", wss
 
-  client.on 'close', (reason) =>
-    @transmit 'client disconnected', {client, reason}
-    #console.log "Client disconnected (#{reason})"
-    # Remove the client from the client list
-    #clients = (c for c in clients when c != client)
- 
-server.listen 4321
+    client.on 'message', (msg) =>
+      data = JSON.parse msg
+      return if data is null or data.local
+      @transmit 'incoming message', data
+      #console.log "message", msg
 
-@listen 'close', -> server.close()
+      # broadcast to all other clients
+      c.send msg for c in wss.clients when c != client
 
+    client.on 'close', (reason) =>
+      @transmit 'client disconnected', {client, reason}
+      #console.log "Client disconnected (#{reason})"
+      # Remove the client from the client list
+      #clients = (c for c in clients when c != client)
+   
+  server.listen port
 
-# Proxy incoming messages from other network channels
-broadcast = ({data: msg}) ->
-  msg = JSON.stringify msg
-  c.send msg for c in wss.clients
-@listen 'send message', broadcast
-@listen 'incoming message', broadcast
+  @listen 'close', -> server.close()
+
+  # Proxy incoming messages from other network channels
+  broadcast = ({data: msg}) ->
+    msg = JSON.stringify msg
+    c.send msg for c in wss.clients
+  @listen 'send message', broadcast
+  @listen 'incoming message', broadcast

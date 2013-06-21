@@ -2,7 +2,7 @@
   local: true
   description: "Serves web interface and listens for browserchannel connections."
 
-@listen 'run server', ({data:{port}, local}) =>
+@listen 'run server', ({data:{port, host}, local}) =>
   return unless local
 
   port ?= 4321
@@ -35,7 +35,7 @@
       # Remove the client from the client list
       #clients = (c for c in clients when c != client)
    
-  server.listen port
+  server.listen port, host
 
   @listen 'close', -> server.close()
 

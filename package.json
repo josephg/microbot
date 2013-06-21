@@ -15,6 +15,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "runrobot": "runrobot"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/josephg/microbot.git"

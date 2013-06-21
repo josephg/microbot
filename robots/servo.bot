@@ -1,0 +1,45 @@
+@robot 'servo',
+  local: true
+  description: "Serves web interface and listens for browserchannel connections."
+
+express = require 'express'
+ws = require 'ws'
+
+app = express()
+app.use express.static(__dirname + '/public')
+
+server = require('http').createServer(app)
+wss = new ws.Server clientTracking:true, path:'/ws', server:server
+
+wss.on 'connection', (client) =>
+  @transmit 'client connected', {client}
+  #console.log "Client connected", wss
+
+  client.on 'message', (msg) =>
+    data = JSON.parse msg
+    return if data is null or data.local
+    @transmit 'incoming message', data
+    #console.log "message", msg
+
+    # broadcast to all other clients
+    c.send msg for c in wss.clients when c != client
+
+  client.on 'close', (reason) =>
+    @transmit 'client disconnected', {client, reason}
+    #console.log "Client disconnected (#{reason})"
+    # Remove the client from the client list
+    #clients = (c for c in clients when c != client)
+ 
+server.listen 4321
+
+@listen 'close', ->
+  console.log 'close'
+  server.close()
+
+
+# Proxy incoming messages from other network channels
+broadcast = ({data: msg}) ->
+  msg = JSON.stringify msg
+  c.send msg for c in wss.clients
+@listen 'send message', broadcast
+@listen 'incoming message', broadcast

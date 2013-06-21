@@ -6,6 +6,9 @@ load = (name) =>
   @children.add fs.readFileSync("robots/#{name}.bot", 'utf8')
 
 load 'node-print'
-load 'servo'
 load 'repl'
+
+load 'federatron'
+
+@transmit 'federate', 'ws://localhost:4321/ws'
 

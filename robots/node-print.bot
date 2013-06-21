@@ -8,8 +8,12 @@ require 'colors'
 printJSON = (data) -> require('util').inspect data, colors:true
 
 @listen (msg) ->
-  if msg.type is 'chat'
-    console.log "#{msg.from.blue}: #{msg.data}"
-  else
-    console.log msg.type.red, printJSON msg
+  switch msg.type
+    when 'chat'
+      console.log "#{msg.from.cyan}: #{msg.data}"
+    when 'robot added'
+      console.log 'Robot added'.grey, "#{msg.data.name} (#{msg.data.info?.description})"
+
+    else
+      console.log msg.type.red, printJSON msg
 

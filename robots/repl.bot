@@ -26,3 +26,6 @@ rl.on 'line', (cmd) =>
   else
     rl.prompt()
 
+rl.on 'close', =>
+  @transmit 'close'
+

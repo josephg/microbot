@@ -32,9 +32,7 @@ wss.on 'connection', (client) =>
  
 server.listen 4321
 
-@listen 'close', ->
-  console.log 'close'
-  server.close()
+@listen 'close', -> server.close()
 
 
 # Proxy incoming messages from other network channels

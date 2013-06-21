@@ -14,7 +14,7 @@ randomId = (length = 10) ->
 
 
 @bridge out: off, in: (msg, pass) =>
-  return if msg.local
+  return pass msg if msg.local
   @children.transmit type: "send message", data: msg
 
 @children.listen "incoming message", ({data:msg}) ->

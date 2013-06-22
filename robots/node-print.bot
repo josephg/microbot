@@ -17,7 +17,7 @@ printJSON = (data) -> require('util').inspect data, colors:true
       console.log 'robot stopped'.grey, msg.name.magenta
 
     when 'error'
-      console.error (msg.data?.stack or msg.data?.message or 'Unknown error').red
+      console.error (msg.data?.stack or msg.data?.message or msg.data or 'Unknown error').red
 
     else
       type = msg.type or '(no type)'

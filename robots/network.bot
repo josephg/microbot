@@ -17,7 +17,7 @@ out = (msg, pass) ->
   return pass msg if msg.local
 
 @bridge out:out, in: (msg, pass) =>
-  return pass msg if msg.local
+  pass msg
   @children.transmit type: "send message", data: msg
 
 #@children.listen "incoming message", ({data:msg}) ->

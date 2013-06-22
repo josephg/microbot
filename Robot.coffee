@@ -202,6 +202,7 @@ defaultbot = ->
     @children.remove id, reply
 
   @listen "list actions", (msg, reply) ->
+    return unless @actions.length
     reply type:"I have actions", data:@actions if @actions.length > 0
 
 

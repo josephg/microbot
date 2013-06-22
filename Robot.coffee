@@ -300,6 +300,49 @@ class Robot extends Messenger
     @children.each (child) -> child.remove()
     @parent = null
 
+
+unless window?
+  # Add a load() method to robot using nodejs
+  fs = require 'fs'
+  path = require 'path'
+
+  Robot::path = ['.', "#{__dirname}/robots"]
+  Robot::findRobot = (name) ->
+    name += '.bot'
+    for p in @path
+      return filename if fs.existsSync (filename = path.resolve p, name)
+
+    throw new Error "Could not find #{name}"
+
+  Robot::load = (name, reply) ->
+    reply ||= (args...) => @transmit args...
+    filename = @findRobot(name)
+    return reply type:'error', data:message:"could not find robot #{name}" unless name
+
+    child = @children.add fs.readFileSync(filename, 'utf8'), reply
+
+    reload = =>
+      #console.log 'reload'.rainbow, filename, child.name.magenta
+      @children.remove child
+      child = @children.add fs.readFileSync(filename, 'utf8'), reply
+
+      #child.replace fs.readFileSync(filename, 'utf8')
+
+    do watch = =>
+      watcher = fs.watch filename, persistent:false, (event) =>
+        if event is 'change'
+          #console.log 'reloading for change'.yellow
+          reload()
+        else
+          watcher.close()
+          # The file has been moved away, and probably replaced. Vim does this, for example.
+          setTimeout ->
+            #console.log 'reloading for rename'.yellow
+            #reload()
+            watch()
+          , 50
+
+
 if window?
   window.Robot = Robot if window
 else

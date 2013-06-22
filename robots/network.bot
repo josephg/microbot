@@ -12,16 +12,19 @@ randomId = (length = 10) ->
   chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-="
   (chars[Math.floor(Math.random() * chars.length)] for x in [0...length]).join('')
 
+out = (msg, pass) ->
+  return pass msg.data if msg.type is 'incoming message' and !msg.data.local
+  return pass msg if msg.local
 
-@bridge out: off, in: (msg, pass) =>
+@bridge out:out, in: (msg, pass) =>
   return pass msg if msg.local
   @children.transmit type: "send message", data: msg
 
-@children.listen "incoming message", ({data:msg}) ->
-  @parent.distribute msg, this
-
+#@children.listen "incoming message", ({data:msg}) ->
+#  @parent.distribute msg, this
 
 # These are actually started by sending the appropriate messages
 @load 'server'
 @load 'netclient'
+
 

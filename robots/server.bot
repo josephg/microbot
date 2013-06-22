@@ -17,7 +17,7 @@
   wss = new ws.Server clientTracking:true, path:'/ws', server:server
 
   wss.on 'connection', (client) =>
-    @transmit 'client connected', {client}
+    @transmit 'client connected' #, {client}
     #console.log "Client connected", wss
 
     client.on 'message', (msg) =>
@@ -30,7 +30,7 @@
       c.send msg for c in wss.clients when c != client
 
     client.on 'close', (reason) =>
-      @transmit 'client disconnected', {client, reason}
+      @transmit 'client disconnected' #, {client, reason}
       #console.log "Client disconnected (#{reason})"
       # Remove the client from the client list
       #clients = (c for c in clients when c != client)

@@ -323,8 +323,12 @@ unless window?
 
     reload = =>
       #console.log 'reload'.rainbow, filename, child.name.magenta
-      @children.remove child
-      child = @children.add fs.readFileSync(filename, 'utf8'), reply
+      fs.readFile filename, 'utf8', (err, newCode) =>
+        return console.error err.stack if err
+
+        return if child.code == newCode
+        @children.remove child
+        child = @children.add newCode, reply
 
       #child.replace fs.readFileSync(filename, 'utf8')
 
@@ -338,7 +342,7 @@ unless window?
           # The file has been moved away, and probably replaced. Vim does this, for example.
           setTimeout ->
             #console.log 'reloading for rename'.yellow
-            #reload()
+            reload()
             watch()
           , 50
 

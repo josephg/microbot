@@ -1,8 +1,5 @@
 @robot 'client', local:true
 
-Robot::load = (name, cb) ->
-  @children.add require('fs').readFileSync("robots/#{name}.bot", 'utf8'), cb
-
 @load 'node-print'
 @load 'network', =>
   @transmit 'net connect', 'ws://localhost:4321/ws'

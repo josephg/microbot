@@ -14,7 +14,6 @@ printJSON = (data) -> require('util').inspect data, colors:true
     when 'robot added'
       console.log 'robot added'.grey, msg.name.magenta, "(#{msg.info?.description})".grey
     when 'robot stopped'
-      console.log msg
       console.log 'robot stopped'.grey, msg.name.magenta
 
     when 'error'

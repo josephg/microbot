@@ -5,7 +5,7 @@
 
 WebSocket = require('ws')
 
-@listen 'net connect', ({data:host, local}, reply) =>
+@action 'net connect', ({data:host, local}, reply) =>
   return unless local
 
   host = '/ws' unless typeof host is 'string'

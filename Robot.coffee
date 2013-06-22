@@ -27,6 +27,7 @@ matchQuery = (obj, query) ->
 class Messenger
   constructor: ->
     @listeners = {}
+    @actions = []
     @lid = 0
     @mid = randomId()
   
@@ -42,19 +43,26 @@ class Messenger
     #console.log "messenger #{@mid} listening for", matcher
     ok = (msg, src) -> cb.call ctx, msg, ctx.makeReply(msg), src
     @listeners[@lid] = (msg, src) ->
-
-      return ok(msg, src) if !matcher?
-      return ok(msg, src) if matcher == msg.type
-      return ok(msg, src) if typeof matcher is 'function' and matcher(msg)
-      return ok(msg, src) if typeof matcher is 'object' and matchQuery(msg, matcher)
-              
+      try
+        return ok(msg, src) if !matcher?
+        return ok(msg, src) if matcher == msg.type
+        return ok(msg, src) if typeof matcher is 'function' and matcher(msg)
+        return ok(msg, src) if typeof matcher is 'object' and matchQuery(msg, matcher)
+      catch e
+        ctx.makeReply(msg) type:'error', data:stack:e.stack
+ 
     return @lid++
   
+  action: (matcher, cb) ->
+    @actions.push if typeof matcher is 'string' then matcher else matcher.type
+    @listen matcher, cb
+
   unlisten: (id) ->
     delete @listeners[id]
 
   unlistenAll: (id) ->
     @listeners = {}
+    @actions.length = 0
 
   ##
   # Transmit and listen are the next level up the communication stack.
@@ -119,8 +127,6 @@ class Children extends Messenger
     @id = @parent.id
     @ctx = @parent
 
-
-
   distribute: (data, source) ->
     nextTick =>
       @receive data unless @parent is source
@@ -138,7 +144,7 @@ class Children extends Messenger
       robot = new Robot @parent, robocode
       @robots[robot.id] = robot
       
-      reply type: "robot added", local: false, data: { id: robot.id, name: robot.name, info: robot.info }
+      reply type: "robot added", local: false, data: robot.id, name: robot.name, info: robot.info
 
       return robot
 
@@ -157,7 +163,7 @@ class Children extends Messenger
     if @robots[robot.id]
       delete @robots[robot.id]
 
-      reply type: "robot stopped", local: false, data: robot.id
+      reply type: "robot stopped", local: false, data: robot.id, name: robot.name
       return robot
     else
       reply type: "error", data: { id: robot.id, msg: "no such robot" }
@@ -195,6 +201,9 @@ defaultbot = ->
   @listen to: @id, trusted: true, type: "remove robot", ({id: msgid, data: id}, reply) ->
     @children.remove id, reply
 
+  @listen "list actions", (msg, reply) ->
+    reply type:"I have actions", data:@actions if @actions.length > 0
+
 
 class Robot extends Messenger
   constructor: (@parent, @code) ->
@@ -212,6 +221,7 @@ class Robot extends Messenger
     @bridge on
 
     if typeof code is 'string'
+      # TODO: Move to using vm.runInContext
       @fn = eval "(function(){" + coffeescript.compile(code, bare: true) + "})"
     else
       [@fn, @code] = [code]
@@ -223,9 +233,13 @@ class Robot extends Messenger
       defaultbot.apply this
 
   replace: (code, reply) ->
-    reply ||= (args...) => @parent.transmit args...
+    console.log 'replace', this
+    reply ||= (args...) => @parent?.transmit args...
     @cleanup()
-    @_init code
+    try
+      @_init code
+    catch e
+      reply type: "error", data:stack:e.stack
 
     reply type: "robot replaced", local: false, data: { id: @id, name: @name, info: @info }
 
@@ -269,7 +283,15 @@ class Robot extends Messenger
     @distribute data, this
 
   cleanup: ->
+    @receive to:@id, trusted:true, type:'cleanup'
     @onCleanup?()
+    #console.log 'cleanup'.red, @name.magenta
+    #console.log Object.keys(@children.robots).length
+    @children.each (child) =>
+      #console.log 'removing child'.blue, child.name.magenta
+      @children.remove child
+    #console.log 'finished cleanup'.red, @name.magenta
+    #console.log 'robots left:'.cyan, (r.name.magenta for k, r of @children.robots)
     @unlistenAll()
   
   # Deactivate myself and children

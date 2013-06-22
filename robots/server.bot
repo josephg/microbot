@@ -2,7 +2,7 @@
   local: true
   description: "Serves web interface and listens for browserchannel connections."
 
-@listen 'run server', ({data:{port, host}, local}) =>
+@action 'run server', ({data:{port, host}, local}) =>
   return unless local
 
   port ?= 4321
@@ -38,6 +38,7 @@
   server.listen port, host
 
   @listen 'close', -> server.close()
+  @listen 'cleanup', -> server.close()
 
   # Proxy incoming messages from other network channels
   broadcast = ({data: msg}) ->

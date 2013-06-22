@@ -12,11 +12,16 @@ printJSON = (data) -> require('util').inspect data, colors:true
     when 'chat'
       console.log "#{msg.from.cyan}: #{msg.data}"
     when 'robot added'
-      console.log 'Robot added'.grey, "#{msg.data.name} (#{msg.data.info?.description})"
+      console.log 'robot added'.grey, msg.name.magenta, "(#{msg.info?.description})".grey
+    when 'robot stopped'
+      console.log msg
+      console.log 'robot stopped'.grey, msg.name.magenta
 
     when 'error'
       console.error (msg.data?.stack or msg.data?.message or 'Unknown error').red
 
     else
-      console.log (msg.type or '(no type)').red, printJSON msg.data
+      type = msg.type or '(no type)'
+      type = if msg.local then type.blue else type.red
+      console.log type, printJSON msg.data
 

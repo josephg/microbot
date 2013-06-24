@@ -27,7 +27,7 @@ register 'send', 'Send a JSON message. Eg, /send chat {data:"oh hi"}', (args, re
   catch e
     reply {type:'error', data:{stack:e.stack}}
 
-register 'la', 'Perform an action', (args, reply) =>
+register 'la', 'Perform a local action', (args, reply) =>
   return reply 'error', 'You need to specify what action to perform' unless args.length > 0
 
   @transmit type:args.join ' '
@@ -36,6 +36,9 @@ register 'a', 'Perform an action', (args, reply) =>
   return reply 'error', 'You need to specify what action to perform' unless args.length > 0
 
   @transmit local:false, type:args.join ' '
+
+register 'listact', 'List actions', =>
+  @transmit type:'list actions', local:false
 
 
 @listen 'register command', ({data:{cmd, fn, desc}, local}) ->

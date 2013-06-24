@@ -103,7 +103,7 @@ class Messenger
   makeReply: (msg) ->
     (metadata, data, callback) =>
       metadata = {type:metadata} if typeof metadata is 'string'
-      metadata.local = msg.local if msg.local?
+      metadata.local ?= msg.local if msg.local?
       metadata.re ?= msg.id
       @transmit metadata, data, callback
 

@@ -5,19 +5,19 @@
 
 WebSocket = require('ws')
 
-@action 'net connect', ({data:host, local}, reply) =>
+@action 'net connect', ({data:address, opts, local}, reply) =>
   return unless local
 
-  host = '/ws' unless typeof host is 'string'
+  address = '/ws' unless typeof address is 'string'
  
   party = null
   reconnect = yes
 
   connect = =>
-    party = new WebSocket host
+    party = new WebSocket address, opts
 
     party.onopen = =>
-      @transmit 'connected', host
+      @transmit 'connected', address
       #console.log 'connected'
 
     party.onmessage = (e) =>

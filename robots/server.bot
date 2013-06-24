@@ -2,7 +2,7 @@
   local: true
   description: "Serves web interface and listens for browserchannel connections."
 
-@action 'run server', ({data:{port, host}, local}) =>
+@action 'run server', ({data:{port, host, https}, local}) =>
   return unless local
 
   port ?= 4321
@@ -13,7 +13,11 @@
   app = express()
   app.use express.static(__dirname + '/public')
 
-  server = require('http').createServer(app)
+  server = if https
+    require('https').createServer https, app
+  else
+    require('http').createServer app
+
   wss = new ws.Server clientTracking:true, path:'/ws', server:server
 
   wss.on 'connection', (client) =>
